@@ -28,7 +28,7 @@ async function uploadFile(srcName, dstName) {
   
     let acl = 'public-read'
     const params = {
-      Bucket: 'gevulot',
+      Bucket: 'gevulot-test',
       Key: dstName,
       ACL: acl,
       Body: fileContent,
@@ -48,6 +48,25 @@ async function callProverCmdCapture(blockNumber) {
     console.log('  stderr:', stderr);
 }
 
+function getRandomWitness() {
+    let n = 441000 + Math.floor(Math.random() * 243);
+    console.log('n = ', n);
+    return n
+  }
+
+async function cloneRandomWitness(blockNumber) {
+    console.log('cloneRandomWitness ', blockNumber)
+    let n = getRandomWitness();
+    let in_path = `./witnesses/witness-${n}.json`;
+    let out_path = `./witnesses/witness-${blockNumber}.json`;
+    console.log('in_path = ', in_path)
+    console.log('out_path = ', out_path)
+    const fileContent = fs.readFileSync(in_path);
+    console.log('fileContent len = ', fileContent.length)
+    let res = fs.writeFileSync(out_path, fileContent);
+}
+
+
 async function calculateChecksum(blockNumber) {
     console.log('calculateChecksum ', blockNumber)
     let cmd = `${process.env.GEVULOT_CLI} --jsonurl ${process.env.GEVULOT_JSONURL}  calculate-hash --file witnesses/witness-${blockNumber}.json`
@@ -61,7 +80,9 @@ async function calculateChecksum(blockNumber) {
 
 async function captureWitness(blockNumber) {
     console.log("captureWitness ", blockNumber)
-    await callProverCmdCapture(blockNumber)
+    // await callProverCmdCapture(blockNumber)
+    // return;
+    await cloneRandomWitness(blockNumber)
     let witness_checksum = await calculateChecksum(blockNumber)
     console.log('  got checksum: ', witness_checksum);
     let witness_name = `witness-${blockNumber}.json`
@@ -169,6 +190,8 @@ function sleep(ms) {
 async function doBlock(blockNumber) {
     console.log("doBlock ", blockNumber)
     let {witness_checksum, witness_name, witness_url} = await captureWitness(blockNumber)
+    // await captureWitness(blockNumber)
+    // return;
     console.log("witness_checksum ", witness_checksum)
     console.log("witness_name ", witness_name)
     console.log("witness_url ", witness_url)
