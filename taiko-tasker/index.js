@@ -1,4 +1,4 @@
-var ethers = require('ethers');
+// var ethers = require('ethers');
 require('dotenv').config();
 const AWS = require('aws-sdk')
 const fs = require('fs')
