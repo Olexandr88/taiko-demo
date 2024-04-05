@@ -10,7 +10,7 @@ if (process.argv.length == 3) {
 
 console.log('firstBlock is ', firstBlock);
 
-var customHttpProvider = new ethers.JsonRpcProvider(process.env.KATLA_ENDPOINT);
+// var customHttpProvider = new ethers.JsonRpcProvider(process.env.KATLA_ENDPOINT);
 
 var s3 = new AWS.S3({
     endpoint: process.env.S3_ENDPOINT,
@@ -203,15 +203,15 @@ async function doBlock(blockNumber) {
         if (verifier_result) {
             console.log('got verifier result, length: ', verifier_result.length);
             console.log(verifier_result)
+            let filepath = `results/result-${blockNumber}`;
             if (verifier_result[0] == '{') {
-                let filepath = `results/result-${blockNumber}`;
                 await writeVerifierResult(verifier_result, filepath);
-                console.log('written to ', filepath);
-                return;
             } else {
-                console.log('unexpected result, exiting');
-                exit();
+                console.log('unexpected result, going to next witness');
+                await writeVerifierResult('unexpected result', filepath);
             }
+            console.log('written to ', filepath);
+            return;
         } else {
             let secs = Date.now() - start;
             console.log(`wait 10 seconds ${secs/1000} sec`);
